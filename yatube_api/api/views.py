@@ -10,11 +10,6 @@ from api.serializers import (
 from api.permission import OwnerOrReadOnly
 
 
-class CreateListViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
-                        viewsets.GenericViewSet):
-    pass
-
-
 class PostViewSet(viewsets.ModelViewSet):
     """
     Класс PostViewSet. Осуществляет проверку на автора поста.
@@ -29,7 +24,8 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
 
-class FollowViewSet(CreateListViewSet):
+class FollowViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
+                    viewsets.GenericViewSet):
     """
     Класс FollowViewSet.
     Позволяет подписаться на другого пользователя.
@@ -39,8 +35,7 @@ class FollowViewSet(CreateListViewSet):
     search_fields = ('following__username',)
 
     def get_queryset(self):
-        user = self.request.user
-        return user.followers.all()
+        return self.request.user.followers.all()
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

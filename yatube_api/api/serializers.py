@@ -1,9 +1,9 @@
+import base64
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
-import base64
 
 from posts.models import (Comment, Post, Group, Follow)
 
@@ -48,15 +48,18 @@ class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
         fields = ('user', 'following')
-        validators = [
+        validators = (
             UniqueTogetherValidator(
                 queryset=Follow.objects.all(),
                 fields=('user', 'following',),
                 message="Нельзя подписаться второй раз."
-            )
-        ]
+            ),
+        )
 
     def validate(self, validated_data):
+        """
+        Валидация отдельного поля following.
+        """
         user = self.context['request'].user
         following = validated_data['following']
         if user == following:
